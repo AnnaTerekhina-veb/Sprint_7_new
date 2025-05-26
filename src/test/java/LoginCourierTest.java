@@ -1,35 +1,55 @@
+import com.github.javafaker.Faker;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import io.qameta.allure.junit4.DisplayName;
+
 
 public class LoginCourierTest {
+
+    private int courierId;
 
     @Before
     public void setUp() {
         RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru/";
-        CourierCreationTest testInstance = new CourierCreationTest();
-        testInstance.createNewCourier();
+
     }
+
 
     // Авторизация курьера
 
     @Test
     public void loginCourier() {
-        Courier existingCourier = CourierCreationTest.getExistingCourier();
+
+        Faker faker = new Faker();
+
+        Courier courier = Courier.builder()
+                .login(faker.name().username())
+                .password(faker.internet().password(4, 12))
+                .firstName(faker.name().firstName())
+                .build();
+        Response createResponse =
+                given()
+                        .header("Content-type", "application/json")
+                        .body(courier)
+                        .post("/api/v1/courier");
+        createResponse.then().statusCode(201);
+        createResponse.then().body("ok", equalTo(true));
 
         Response response =
                 given()
                         .header("Content-type", "application/json")
-                        .body(existingCourier)
+                        .body(courier)
                         .post("/api/v1/courier/login");
         response.then().statusCode(200);
         response.then().body("id", notNullValue());
+
+        courierId = response.jsonPath().getInt("id");
     }
 
     // Авторизация курьера без логина
@@ -73,7 +93,7 @@ public class LoginCourierTest {
 // Авторизация несуществующего курьера
 
     @Test
-    public void loginCourierDoesNotExist(){
+    public void loginCourierDoesNotExist() {
 
         Courier courierDoesNotExist = Courier.builder()
                 .login("па33вы6аыва")
@@ -86,5 +106,16 @@ public class LoginCourierTest {
                         .post("/api/v1/courier/login");
         response.then().statusCode(404);
         response.then().body("message", equalTo("Учетная запись не найдена"));
+    }
+
+    @After
+    public void tearDown() {
+        if (courierId != 0) {
+
+            given()
+                    .header("Content-type", "application/json")
+                    .delete("/api/v1/courier/" + courierId)
+                    .then().statusCode(200);
+        }
     }
 }

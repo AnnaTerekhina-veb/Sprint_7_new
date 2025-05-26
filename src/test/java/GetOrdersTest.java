@@ -2,7 +2,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.Before;
 import org.junit.Test;
-import io.qameta.allure.junit4.DisplayName;
+
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -24,9 +24,7 @@ public class GetOrdersTest {
                 .statusCode(200)
                 // Проверяем, что поле "orders" есть и является списком
                 .body("orders", notNullValue())
-                .body("orders", instanceOf(java.util.List.class))
-                // Можно дополнительно проверить, что список не пустой (если ожидается)
-                .body("orders.size()", greaterThanOrEqualTo(0));
+                .body("orders", instanceOf(java.util.List.class));
 
         Response response = given()
                 .header("Content-type", "application/json")

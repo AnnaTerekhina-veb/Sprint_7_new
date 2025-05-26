@@ -8,7 +8,6 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
-import io.qameta.allure.junit4.DisplayName;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;

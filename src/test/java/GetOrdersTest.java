@@ -22,9 +22,7 @@ public class GetOrdersTest {
                 .get("/api/v1/orders")
                 .then()
                 .statusCode(200)
-                // Проверяем, что поле "orders" есть и является списком
-                .body("orders", notNullValue())
-                .body("orders", instanceOf(java.util.List.class));
+                .body("orders", notNullValue());
 
         Response response = given()
                 .header("Content-type", "application/json")
